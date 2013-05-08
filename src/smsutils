@@ -1,0 +1,21 @@
+#Usage: subclass smsHandler and smsObject
+
+class smsHandler:
+	def __init__(self, port):
+		#open port
+	def start(self):
+		pass
+	def stop(self):
+		pass
+	def monitor(self):
+		pass
+		#note call self.receive() here to call subclass method
+	def receive(self):
+		print "Please create a function receive() within your subclass of smsHandler."
+	def send(self, message):
+		pass
+
+class smsObject:
+	self.handled = false
+	def __init__(self, number="", message=""):
+		pass
