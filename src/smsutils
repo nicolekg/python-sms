@@ -1,21 +1,95 @@
 #Usage: subclass smsHandler and smsObject
+import serial
+import threading
 
-class smsHandler:
+incoming = []
+outgoing = []
+msgStatus = {
+    'unread':'REC UNREAD',
+    'read' : 'REC READ',
+    'all' : 'ALL'
+}
+
+class smsHandler():
 	def __init__(self, port):
-		#open port
+		self.port = port
 	def start(self):
-		pass
+		monitor = threading.Thread(target = self.monitorPort)
+		monitor.daemon = True
+		monitor.start()
 	def stop(self):
 		pass
-	def monitor(self):
-		pass
-		#note call self.receive() here to call subclass method
-	def receive(self):
-		print "Please create a function receive() within your subclass of smsHandler."
+	def receive(self, message):
+		print "Please create a function receive(smsObject) within your subclass of smsHandler."
 	def send(self, message):
-		pass
+		outgoing.append(message)
+
+	def monitorPort(self):
+		while(1):
+			try:
+				self.port = serial.Serial(self.port, 115200, timeout=5)
+				break
+			except serial.SerialException:
+				print "Waiting for the gsm device..."
+		flush(self.port)
+		while(1):
+			while len(outgoing) > 0:
+				#send outgoing messages
+			fWrite(self.port, ['AT\r\n','AT+CMGF=1\r\n','AT+CMGL="%s"\r\n'%(msgStatus['unread'])])  #get all messages 
+			#check for messages and add to list
+			self.read()
+			while len(incoming) > 0
+				self.receive(incoming.pop())
+	def read(self):
+		inside_cmgl_output = False
+		while(1):
+			print "Reading AT input..."
+	        line = port.readline()
+	        print 'debug:',line
+	        if line.startswith(('BOOT', 'MODE', '^BOOT', '^MODE'):
+	            break
+	        if line.startswith('AT+CMGL='):
+	            inside_cmgl_output = True
+	            continue
+	        if line.startswith('+CMGL'):
+	            info = line.split(',')
+	            index = info[0].split(':')[1]
+	            number = info[2]
+	            date = info[5]
+	            time = info[4]
+	            msg = port.readline()
+	            print 'message#%s from %s date %s time %s %s'     \
+	                %(index,number,date,time,msg)
+	            sms = smsObject(index,number,date,time,msg)
+	            incoming.append(sms)
+	        if inside_cmgl_output and line.startswith('OK'):
+	            break
+
+def flush(port):
+	port.flushInput()
+    port.flushOutput()
+def fWrite(port, commands):
+	#writes a list of commands to a port and flushes the input and output between each one
+	for msg in commands:
+		flush(port)
+    	port.write(msg)
+
+#a thread that watches for objects in a list and performs an action on them
+class ActionThread(threading.Thread):
+	def __init__(self, action, objects):
+		threading.Thread.__init__(self)
+		self.action = action
+		self.objects = objects
+	def run(self):
+		while(1):
+			if objects:
+				action(objects.pop(0))
 
 class smsObject:
 	self.handled = false
-	def __init__(self, number="", message=""):
+	def __init__(self, index=0, number="", date="", time="", message=""):
 		pass
+
+class incomingMessage(smsObject):
+
+class outgoingMessage(smsObject):
