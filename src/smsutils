@@ -1,9 +1,11 @@
 #Usage: subclass smsHandler and smsObject
 import serial
 import threading
+from collections import deque
+import time
 
-incoming = []
-outgoing = []
+incoming = deque()
+outgoing = deque()
 msgStatus = {
     'unread':'REC UNREAD',
     'read' : 'REC READ',
@@ -25,6 +27,7 @@ class smsHandler():
 		outgoing.append(message)
 
 	def monitorPort(self):
+		time = time.time()
 		while(1):
 			try:
 				self.port = serial.Serial(self.port, 115200, timeout=5)
@@ -34,15 +37,20 @@ class smsHandler():
 		flush(self.port)
 		while(1):
 			while len(outgoing) > 0:
-				#send outgoing messages
+				self.send(outgoing.popLeft())
 			fWrite(self.port, ['AT\r\n','AT+CMGF=1\r\n','AT+CMGL="%s"\r\n'%(msgStatus['unread'])])  #get all messages 
 			#check for messages and add to list
 			self.read()
 			while len(incoming) > 0
-				self.receive(incoming.pop())
+				self.receive(incoming.popLeft())
 	def read(self):
 		inside_cmgl_output = False
+		time = time.time()
 		while(1):
+			if time.time()-time>60000:
+				#break if no message received after a minute
+				print "No valid input"
+				break
 			print "Reading AT input..."
 	        line = port.readline()
 	        print 'debug:',line
@@ -64,6 +72,8 @@ class smsHandler():
 	            incoming.append(sms)
 	        if inside_cmgl_output and line.startswith('OK'):
 	            break
+	def send(self, message):
+		pass
 
 def flush(port):
 	port.flushInput()
